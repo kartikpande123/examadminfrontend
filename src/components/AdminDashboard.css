@@ -1,0 +1,267 @@
+/* Navbar Container */
+.custom-navbar {
+  background: linear-gradient(135deg, #e3f2fd, #bbdefb); /* Light blue gradient */
+  padding: 1.5rem 2rem;
+  border-bottom: 2px solid #90caf9; /* Light blue border */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #0d47a1; /* Darker blue for contrast */
+}
+
+/* Brand Section */
+.navbar-brand {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.brand-icon {
+  font-size: 1.5rem;
+  color: #0d47a1; /* Primary blue color */
+  background: rgba(13, 71, 161, 0.1); /* Soft blue background */
+  padding: 0.7rem;
+  border-radius: 50%;
+  transition: transform 0.3s ease, background 0.3s ease;
+}
+
+.brand-icon:hover {
+  background: rgba(13, 71, 161, 0.2); /* Slightly darker on hover */
+  transform: scale(1.2);
+}
+
+.brand-text {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #1565c0; /* Medium blue */
+  letter-spacing: 0.5px;
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* Dashboard Title */
+.dashboard-title {
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: #1976d2; /* Professional blue tone */
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* Logout Button */
+.logout-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.6rem 1.8rem;
+  font-size: 1rem;
+  font-weight: 600;
+  background: linear-gradient(135deg, #64b5f6, #42a5f5); /* Blue gradient */
+  color: #ffffff; /* White text */
+  border: none;
+  border-radius: 50px;
+  box-shadow: 0 4px 6px rgba(66, 165, 245, 0.4);
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.logout-btn:hover {
+  background: linear-gradient(135deg, #42a5f5, #2196f3); /* Slightly darker gradient */
+  box-shadow: 0 6px 10px rgba(66, 165, 245, 0.6);
+  transform: translateY(-2px);
+}
+
+/* Hover Effects for Navbar */
+.custom-navbar:hover {
+  background: linear-gradient(135deg, #e1f5fe, #b3e5fc); /* Lighter pastel blue on hover */
+  transition: background 0.4s ease;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .brand-text {
+    font-size: 1.4rem;
+  }
+
+  .dashboard-title {
+    font-size: 1.1rem;
+  }
+
+  .logout-btn {
+    padding: 0.5rem 1.2rem;
+    font-size: 0.9rem;
+  }
+}
+
+.dashboard-title {
+  font-size: 2.5rem; /* Big text */
+  font-weight: 800; /* Extra bold */
+  color: #0d47a1; /* Dark blue for a professional look */
+  letter-spacing: 1.5px; /* Spaced letters for elegance */
+  text-transform: uppercase; /* All caps for prominence */
+  text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2); /* Subtle shadow for depth */
+  background: linear-gradient(90deg, #64b5f6, #42a5f5); /* Blue gradient background */
+  -webkit-background-clip: text; /* Clip background to text */
+  -webkit-text-fill-color: transparent; /* Make the background visible inside the text */
+  display: inline-block;
+  transition: all 0.3s ease; /* Smooth hover effect */
+}
+
+.dashboard-title:hover {
+  transform: scale(1.1); /* Slight enlargement on hover */
+  text-shadow: 3px 3px 8px rgba(0, 0, 0, 0.3); /* More prominent shadow on hover */
+}
+
+
+
+/* Dashboard grid styles */
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  width: 100%;
+  max-width: 1200px;
+}
+
+.logout-popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+.logout-popup {
+  background: #fff;
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  text-align: center;
+}
+.popup-buttons button {
+  margin: 0 10px;
+}
+
+
+/* Dashboard buttons */
+.dashboard-button {
+  position: relative;
+  width: 100%;
+  background: #ffffff;
+  border: 1px solid #dee2e6;
+  padding: 1.5rem;
+  border-radius: 0.75rem;
+  cursor: pointer;
+  transition: transform 0.3s ease, box-shadow 0.3s ease, border 0.3s ease;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.dashboard-button:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+  border-color: #adb5bd;
+}
+
+.button-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.icon-container {
+  background: #f8f9fa;
+  padding: 1rem;
+  border-radius: 50%;
+  border: 2px solid #dee2e6;
+  transition: background 0.3s ease;
+}
+
+.icon-container:hover {
+  background: #e9ecef;
+}
+
+.button-title {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #495057;
+}
+
+/* Hover effect */
+.hover-effect {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 123, 255, 0.1);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.dashboard-button:hover .hover-effect {
+  opacity: 1;
+}
+
+/* Active pulse animation */
+@keyframes pulse {
+  0% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 0.2;
+  }
+  100% {
+    opacity: 0.5;
+  }
+}
+
+.active-pulse {
+  position: absolute;
+  inset: 0;
+  background-color: #e63946;
+  opacity: 0.1;
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Glass morphism effect */
+.dashboard-button {
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+  .brand-text {
+    font-size: 1.3rem;
+  }
+
+  .dashboard-button {
+    padding: 1rem;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #adb5bd;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #868e96;
+}
+
+.brand-text{
+  gap: 10px;
+}
