@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import API_BASE_URL from './configApi';
 
 const UploadExamQA = () => {
   const [selectedExam, setSelectedExam] = useState("");
@@ -14,7 +15,7 @@ const UploadExamQA = () => {
 
   const fetchExams = async () => {
     try {
-      const response = await fetch('http://localhost:5555/api/exams');
+      const response = await fetch(`${API_BASE_URL}/api/exams`);
       if (!response.ok) throw new Error('Failed to fetch exams');
       const data = await response.json();
       setExamsList(data.data || []);
@@ -33,7 +34,7 @@ const UploadExamQA = () => {
 
     try {
       setLoading(true);
-      const response = await fetch("http://localhost:5555/api/exam-qa", {
+      const response = await fetch(`${API_BASE_URL}/api/exam-qa`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 
