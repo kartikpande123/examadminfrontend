@@ -31,8 +31,8 @@ const Notification = () => {
     try {
       setLoading(true);
       const url = isUpdate 
-        ? `http://localhost:5555/api/notifications/${notificationData.id}`
-        : 'http://localhost:5555/api/notifications';
+        ? `${API_BASE_URL}/api/notifications/${notificationData.id}`
+        : `${API_BASE_URL}/api/notifications`;
         
       const response = await fetch(url, {
         method: isUpdate ? 'PUT' : 'POST',
@@ -115,7 +115,7 @@ const Notification = () => {
   const handleDeleteNotification = async (notificationId) => {
     if (window.confirm("Are you sure you want to delete this notification?")) {
       try {
-        const response = await fetch(`http://localhost:5555/api/notifications/${notificationId}`, {
+        const response = await fetch(`${API_BASE_URL}/api/notifications/${notificationId}`, {
           method: 'DELETE'
         });
 

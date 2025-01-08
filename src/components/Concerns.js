@@ -28,7 +28,7 @@ const Concerns = () => {
   // Handle deleting a concern
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`http://localhost:5555/api/concerns/${id}`);
+      await axios.delete(`${API_BASE_URL}/api/concerns/${id}`);
       setConcerns((prevConcerns) => prevConcerns.filter((concern) => concern.id !== id));
     } catch (err) {
       console.error("Failed to delete concern:", err);
