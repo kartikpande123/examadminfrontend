@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import API_BASE_URL from './configApi';
 
-
 const ExamResults = () => {
   const [loading, setLoading] = useState(false);
   const [generating, setGenerating] = useState(false);
@@ -13,14 +12,12 @@ const ExamResults = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [searchType, setSearchType] = useState('name');
 
-  // Fetch all exam results on component mount
   useEffect(() => {
     const fetchAllExams = async () => {
       try {
         const response = await fetch(`${API_BASE_URL}/api/all-exam-results`);
         const data = await response.json();
         if (data.success && data.data.length > 0) {
-          // Transform the data for dropdown
           const formattedExams = data.data.map(exam => ({
             examName: exam.examId,
             results: exam.candidates.map(candidate => ({
@@ -46,7 +43,6 @@ const ExamResults = () => {
       const data = await response.json();
       if (data.success) {
         setSuccessMessage('Today\'s exam results generated successfully!');
-        // Add the new results to the exams list if not already present
         const examExists = exams.some(exam => exam.examName === data.examDetails.examName);
         if (!examExists) {
           setExams(prev => [...prev, {
@@ -66,7 +62,6 @@ const ExamResults = () => {
     }
   };
 
-  // Handle exam selection
   useEffect(() => {
     if (!selectedExam) {
       setResults(null);
@@ -78,9 +73,6 @@ const ExamResults = () => {
       setResults({
         examDetails: {
           examName: selectedExamData.examName,
-          date: selectedExamData.date,
-          startTime: selectedExamData.startTime,
-          endTime: selectedExamData.endTime,
           totalMarks: selectedExamData.totalMarks
         },
         results: selectedExamData.results || []
@@ -99,7 +91,6 @@ const ExamResults = () => {
 
   return (
     <div className="container mt-4">
-      {/* Navbar/Header */}
       <nav className="navbar navbar-expand-lg navbar-light bg-primary text-white p-3 rounded shadow-sm">
         <div className="container-fluid justify-content-between">
           <div>
@@ -139,21 +130,18 @@ const ExamResults = () => {
         </div>
       </nav>
 
-      {/* Success Message */}
       {successMessage && (
         <div className="alert alert-success mt-4 d-flex align-items-center">
           <div>{successMessage}</div>
         </div>
       )}
 
-      {/* Error Message */}
       {error && (
         <div className="alert alert-danger mt-4 d-flex align-items-center">
           <div>{error}</div>
         </div>
       )}
 
-      {/* Loading Indicator */}
       {loading && !generating && (
         <div className="text-center mt-4">
           <div className="spinner-border text-primary" role="status">
@@ -162,29 +150,17 @@ const ExamResults = () => {
         </div>
       )}
 
-      {/* Results Section */}
       {results && (
         <div className="card mt-4 shadow">
-          {/* Exam Details */}
           <div className="card-header bg-primary text-white">
             <h2 className="h5 mb-0">{results.examDetails.examName}</h2>
             <div className="mt-2 row">
-              <div className="col-md-3">
-                <strong>Date:</strong> {results.examDetails.date}
-              </div>
-              <div className="col-md-3">
-                <strong>Time:</strong> {results.examDetails.startTime} - {results.examDetails.endTime}
-              </div>
-              <div className="col-md-3">
-                <strong>Total Marks:</strong> {results.examDetails.totalMarks}
-              </div>
-              <div className="col-md-3">
+              <div className="col-md-6">
                 <strong>Total Candidates:</strong> {results.results.length}
               </div>
             </div>
           </div>
 
-          {/* Search Controls */}
           <div className="card-body border-bottom">
             <div className="row align-items-center">
               <div className="col-md-6">
@@ -215,7 +191,6 @@ const ExamResults = () => {
             </div>
           </div>
 
-          {/* Results Table */}
           <div className="card-body">
             <div className="table-responsive">
               <table className="table table-bordered table-striped table-hover">
