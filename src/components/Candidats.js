@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { format, parse } from 'date-fns';
 import API_BASE_URL from './configApi';
 
 const Candidates = () => {
@@ -26,7 +27,15 @@ const Candidates = () => {
           examsRes.json()
         ]);
 
-        setCandidates(candidatesData.candidates);
+        const formattedCandidates = candidatesData.candidates.map(candidate => ({
+          ...candidate,
+          dob: candidate.dob ? new Date(candidate.dob) : null,
+          examDate: candidate.examDate,
+          examStartTime: candidate.examStartTime,
+          examEndTime: candidate.examEndTime
+        }));
+
+        setCandidates(formattedCandidates);
         setExams(examsData.data);
         setLoading(false);
       } catch (err) {
@@ -37,6 +46,26 @@ const Candidates = () => {
 
     fetchData();
   }, []);
+
+  const formatDate = (dateString) => {
+    if (!dateString) return 'Invalid Date';
+    try {
+      const date = new Date(dateString);
+      return format(date, 'dd/MM/yyyy');
+    } catch {
+      return 'Invalid Date';
+    }
+  };
+
+  const formatExamDateTime = (examDate, startTime, endTime) => {
+    if (!examDate || !startTime || !endTime) return 'Schedule not set';
+    try {
+      const formattedDate = format(new Date(examDate), 'dd/MM/yyyy');
+      return `${formattedDate} (${startTime} - ${endTime})`;
+    } catch {
+      return 'Invalid Schedule';
+    }
+  };
 
   const filteredCandidates = selectedExam
     ? candidates.filter(candidate => candidate.exam === selectedExam)
@@ -106,21 +135,21 @@ const Candidates = () => {
           </div>
         </div>
         <div className="card-body p-0">
-          <div className="table-responsive">
+          <div className="table-responsive" style={{ minWidth: '1400px' }}>
             <table className="table table-hover table-bordered mb-0">
               <thead className="table-light">
                 <tr className="text-center">
-                  <th className="px-4 py-3 border-end">#</th>
-                  <th className="px-4 py-3 border-end">Photo</th>
-                  <th className="px-4 py-3 border-end">Name</th>
-                  <th className="px-4 py-3 border-end">Registration Number</th>
-                  <th className="px-4 py-3 border-end">Date of Birth</th>
-                  <th className="px-4 py-3 border-end">Gender</th>
-                  <th className="px-4 py-3 border-end">Phone</th>
-                  <th className="px-4 py-3 border-end">District</th>
-                  <th className="px-4 py-3 border-end">State</th>
-                  <th className="px-4 py-3 border-end">Exam</th>
-                  <th className="px-4 py-3">Exam Start Time</th>
+                  <th style={{ width: '50px' }} className="px-4 py-3 border-end">#</th>
+                  <th style={{ width: '80px' }} className="px-4 py-3 border-end">Photo</th>
+                  <th style={{ width: '180px' }} className="px-4 py-3 border-end">Name</th>
+                  <th style={{ width: '160px' }} className="px-4 py-3 border-end">Registration Number</th>
+                  <th style={{ width: '120px' }} className="px-4 py-3 border-end">Date of Birth</th>
+                  <th style={{ width: '100px' }} className="px-4 py-3 border-end">Gender</th>
+                  <th style={{ width: '130px' }} className="px-4 py-3 border-end">Phone</th>
+                  <th style={{ width: '130px' }} className="px-4 py-3 border-end">District</th>
+                  <th style={{ width: '130px' }} className="px-4 py-3 border-end">State</th>
+                  <th style={{ width: '200px' }} className="px-4 py-3 border-end">Exam</th>
+                  <th style={{ width: '220px' }} className="px-4 py-3">Exam Schedule</th>
                 </tr>
               </thead>
               <tbody>
@@ -145,13 +174,15 @@ const Candidates = () => {
                         </div>
                       )}
                     </td>
-                    <td className="px-4 py-3 border-end align-middle">{candidate.candidateName}</td>
+                    <td className="px-4 py-3 border-end align-middle text-start">{candidate.candidateName}</td>
                     <td className="px-4 py-3 border-end align-middle">
                       <span className="badge bg-light text-dark border">
                         {candidate.registrationNumber}
                       </span>
                     </td>
-                    <td className="px-4 py-3 border-end align-middle">{candidate.dob}</td>
+                    <td className="px-4 py-3 border-end align-middle">
+                      {formatDate(candidate.dob)}
+                    </td>
                     <td className="px-4 py-3 border-end align-middle">
                       <span className={`badge ${candidate.gender === 'male' ? 'bg-info' : 'bg-danger'}`}>
                         {candidate.gender}
@@ -161,12 +192,16 @@ const Candidates = () => {
                     <td className="px-4 py-3 border-end align-middle">{candidate.district}</td>
                     <td className="px-4 py-3 border-end align-middle">{candidate.state}</td>
                     <td className="px-4 py-3 border-end align-middle">
-                      <span className="badge bg-success">
+                      <span className="badge bg-success" style={{ fontSize: '0.85rem', whiteSpace: 'normal', wordWrap: 'break-word' }}>
                         {candidate.exam}
                       </span>
                     </td>
-                    <td className="px-4 py-3 align-middle">
-                      {new Date(candidate.examStartTime).toLocaleString()}
+                    <td className="px-4 py-3 align-middle" style={{ fontSize: '0.9rem' }}>
+                      {formatExamDateTime(
+                        candidate.examDate,
+                        candidate.examStartTime,
+                        candidate.examEndTime
+                      )}
                     </td>
                   </tr>
                 ))}
