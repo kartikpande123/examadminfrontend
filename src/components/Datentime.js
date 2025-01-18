@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Save, Edit, Trash2 } from "lucide-react";
+import React, { useState, useEffect, useRef } from "react";
+import { Save, Edit } from "lucide-react";
 import "./DateNTime.css";
 import API_BASE_URL from './configApi';
 
@@ -9,18 +9,88 @@ const ExamDateNTime = () => {
   const [startTime, setStartTime] = useState("");
   const [endTime, setEndTime] = useState("");
   const [marks, setMarks] = useState("");
-  const [price, setPrice] = useState(""); // NEW: Price field
+  const [price, setPrice] = useState("");
   const [exams, setExams] = useState([]);
   const [editIndex, setEditIndex] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(true);
+  
+  const formRef = useRef(null);
 
-  // Function to convert 24-hour time to 12-hour format with AM/PM
-  const convertTo12HourFormat = (time) => {
-    const [hours, minutes] = time.split(":");
-    const hoursInt = parseInt(hours, 10);
-    const amPm = hoursInt >= 12 ? "PM" : "AM";
-    const twelveHour = hoursInt % 12 || 12;
-    return `${twelveHour}:${minutes} ${amPm}`;
+  useEffect(() => {
+    fetchExams();
+  }, []);
+
+  const fetchExams = async () => {
+    try {
+      setInitialLoading(true);
+      const response = await fetch(`${API_BASE_URL}/api/exams`);
+      
+      if (!response.ok) {
+        throw new Error("Failed to fetch exams");
+      }
+
+      const result = await response.json();
+      
+      if (result.success && result.data) {
+        const transformedExams = result.data
+          .filter(exam => exam.dateTime)
+          .map(exam => ({
+            title: exam.id,
+            date: exam.dateTime.date || "",
+            startTime: exam.dateTime.startTime ? to24HourFormat(exam.dateTime.startTime) : "",
+            endTime: exam.dateTime.endTime ? to24HourFormat(exam.dateTime.endTime) : "",
+            marks: exam.dateTime.marks || "",
+            price: exam.dateTime.price || "",
+          }));
+        
+        setExams(transformedExams);
+      }
+    } catch (error) {
+      console.error("Error fetching exams:", error);
+      alert("Failed to load existing exams. Please refresh the page.");
+    } finally {
+      setInitialLoading(false);
+    }
+  };
+
+  const to24HourFormat = (time12h) => {
+    if (!time12h) return "";
+    try {
+      const [timePart, modifier] = time12h.split(' ');
+      let [hours, minutes] = timePart.split(':');
+      
+      hours = parseInt(hours);
+      if (modifier === 'PM' && hours < 12) hours = hours + 12;
+      if (modifier === 'AM' && hours === 12) hours = 0;
+      
+      return `${String(hours).padStart(2, '0')}:${minutes}`;
+    } catch (error) {
+      console.error("Time conversion error:", error);
+      return "";
+    }
+  };
+
+  const to12HourFormat = (time24h) => {
+    if (!time24h) return "";
+    try {
+      const [hours24, minutes] = time24h.split(':');
+      const hours = parseInt(hours24);
+      const period = hours >= 12 ? 'PM' : 'AM';
+      const hours12 = hours % 12 || 12;
+      return `${hours12}:${minutes} ${period}`;
+    } catch (error) {
+      console.error("Time conversion error:", error);
+      return "";
+    }
+  };
+
+  const isDateTaken = (date) => {
+    const otherExams = editIndex !== null 
+      ? exams.filter((_, index) => index !== editIndex)
+      : exams;
+    
+    return otherExams.some(exam => exam.date === date);
   };
 
   const saveExamToDatabase = async (examData) => {
@@ -37,8 +107,8 @@ const ExamDateNTime = () => {
           },
           body: JSON.stringify({
             date: examData.date,
-            startTime: convertTo12HourFormat(examData.startTime),
-            endTime: convertTo12HourFormat(examData.endTime),
+            startTime: to12HourFormat(examData.startTime),
+            endTime: to12HourFormat(examData.endTime),
             marks: examData.marks,
             price: examData.price,
           }),
@@ -50,8 +120,8 @@ const ExamDateNTime = () => {
         throw new Error(errorData.error || "Failed to save exam");
       }
 
-      const data = await response.json();
-      return data;
+      await response.json();
+      await fetchExams();
     } catch (error) {
       console.error("Error saving exam:", error);
       throw error;
@@ -66,6 +136,11 @@ const ExamDateNTime = () => {
       return;
     }
 
+    if (isDateTaken(examDate)) {
+      alert("An exam is already scheduled for this date. Please choose a different date.");
+      return;
+    }
+
     const newExam = {
       title: examTitle,
       date: examDate,
@@ -76,24 +151,15 @@ const ExamDateNTime = () => {
     };
 
     try {
-      const result = await saveExamToDatabase(newExam);
+      await saveExamToDatabase(newExam);
 
-      if (editIndex !== null) {
-        const updatedExams = [...exams];
-        updatedExams[editIndex] = newExam;
-        setExams(updatedExams);
-        setEditIndex(null);
-      } else {
-        setExams([...exams, newExam]);
-      }
-
-      // Clear form
       setExamTitle("");
       setExamDate("");
       setStartTime("");
       setEndTime("");
       setMarks("");
       setPrice("");
+      setEditIndex(null);
 
       alert("Exam saved successfully!");
     } catch (error) {
@@ -110,7 +176,14 @@ const ExamDateNTime = () => {
     setMarks(exam.marks);
     setPrice(exam.price);
     setEditIndex(index);
+    
+    // Scroll to form smoothly
+    formRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
+
+  if (initialLoading) {
+    return <div className="loading">Loading exams...</div>;
+  }
 
   return (
     <div className="exam-manager">
@@ -119,7 +192,7 @@ const ExamDateNTime = () => {
         Add, edit, or delete exams with their date, time, marks, and price.
       </p>
 
-      <div className="exam-inputs">
+      <div className="exam-inputs" ref={formRef}>
         <label>Exam Title:</label>
         <input
           type="text"
@@ -136,6 +209,7 @@ const ExamDateNTime = () => {
           onChange={(e) => setExamDate(e.target.value)}
           className="styled-input"
           disabled={loading}
+          min={new Date().toISOString().split('T')[0]}
         />
         <label>Start Time:</label>
         <input
@@ -193,7 +267,7 @@ const ExamDateNTime = () => {
                   <p className="exam-datetime">
                     Date: {exam.date}
                     <br />
-                    Time: {convertTo12HourFormat(exam.startTime)} - {convertTo12HourFormat(exam.endTime)}
+                    Time: {to12HourFormat(exam.startTime)} - {to12HourFormat(exam.endTime)}
                     <br />
                     Marks: {exam.marks}
                     <br />
@@ -208,14 +282,6 @@ const ExamDateNTime = () => {
                     disabled={loading}
                   >
                     <Edit size={16} /> Edit
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setExams(exams.filter((_, i) => i !== index))}
-                    className="delete-button"
-                    disabled={loading}
-                  >
-                    <Trash2 size={16} /> Delete
                   </button>
                 </div>
               </li>
