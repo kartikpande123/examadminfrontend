@@ -80,6 +80,16 @@ const ExamResults = () => {
     }
   }, [selectedExam, exams]);
 
+  const getSubmissionStatus = (result) => {
+    if (result.submitted === true) {
+      return { status: 'Submitted', className: 'text-success' };
+    } else if (!result.used) {
+      return { status: 'Not Attended', className: 'text-warning' };
+    } else {
+      return { status: 'Network Error', className: 'text-danger' };
+    }
+  };
+
   const filteredResults = results?.results?.filter(result => {
     const searchTermLower = searchTerm.toLowerCase();
     if (searchType === 'name') {
@@ -154,10 +164,8 @@ const ExamResults = () => {
         <div className="card mt-4 shadow">
           <div className="card-header bg-primary text-white">
             <h2 className="h5 mb-0">{results.examDetails.examName}</h2>
-            <div className="mt-2 row">
-              <div className="col-md-6">
-                <strong>Total Candidates:</strong> {results.results.length}
-              </div>
+            <div className="mt-2">
+              <strong>Total Candidates:</strong> {results.results.length}
             </div>
           </div>
 
@@ -199,7 +207,7 @@ const ExamResults = () => {
                     <th scope="col">S.No</th>
                     <th scope="col">Candidate Name</th>
                     <th scope="col">Reg. Number</th>
-                    <th scope="col">Phone</th>
+                    <th scope="col">Status</th>
                     <th scope="col">Correct</th>
                     <th scope="col">Wrong</th>
                     <th scope="col">Skipped</th>
@@ -207,18 +215,21 @@ const ExamResults = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredResults?.sort((a, b) => b.correctAnswers - a.correctAnswers).map((result, index) => (
-                    <tr key={result.registrationNumber}>
-                      <td>{index + 1}</td>
-                      <td>{result.candidateName}</td>
-                      <td>{result.registrationNumber}</td>
-                      <td>{result.phone}</td>
-                      <td className="text-success fw-bold">{result.correctAnswers}</td>
-                      <td className="text-danger fw-bold">{result.wrongAnswers}</td>
-                      <td className="text-warning fw-bold">{result.skippedQuestions}</td>
-                      <td>{result.totalQuestions}</td>
-                    </tr>
-                  ))}
+                  {filteredResults?.sort((a, b) => b.correctAnswers - a.correctAnswers).map((result, index) => {
+                    const { status, className } = getSubmissionStatus(result);
+                    return (
+                      <tr key={result.registrationNumber}>
+                        <td>{index + 1}</td>
+                        <td>{result.candidateName}</td>
+                        <td>{result.registrationNumber}</td>
+                        <td className={className}>{status}</td>
+                        <td className="text-success fw-bold">{result.correctAnswers || 0}</td>
+                        <td className="text-danger fw-bold">{result.wrongAnswers || 0}</td>
+                        <td className="text-warning fw-bold">{result.skippedQuestions || 0}</td>
+                        <td>{result.totalQuestions || 0}</td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
