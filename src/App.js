@@ -11,6 +11,7 @@ import Candidates from "./components/Candidats";
 import UploadExamQA from "./components/UploadQa";
 import ExamResults from "./components/Results";
 import Protected from "./components/Protected";
+import WinnerDetails from "./components/WinnerDetails"
 
 function App() {
   return (
@@ -27,6 +28,7 @@ function App() {
           <Route path="/uploadqa" element={<Protected Component={UploadExamQA} />} />
           <Route path="/candidates" element={<Protected Component={Candidates} />} />
           <Route path="/examresults" element={<Protected Component={ExamResults} />} />
+          <Route path="/winnerdetails" element={<Protected Component={WinnerDetails} />} />
         </Routes>
       </div>
     </Router>

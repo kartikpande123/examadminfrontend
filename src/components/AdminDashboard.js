@@ -9,6 +9,7 @@ import {
   Award,
   Users,
   HelpCircle,
+  Trophy, // Added for winner details icon
   Delete,
 } from 'lucide-react';
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -22,11 +23,10 @@ const AdminDashboard = () => {
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    localStorage.removeItem("isAuthenticated"); // Remove the authentication flag
-    setShowLogoutPopup(false); // Close the logout confirmation popup
-    navigate("/"); // Navigate to the login page
+    localStorage.removeItem("isAuthenticated");
+    setShowLogoutPopup(false);
+    navigate("/");
   };
-  
 
   const dashboardButtons = [
     { id: 1, title: 'Add Question', icon: <Plus size={24} />, color: '#4CAF50' },
@@ -36,7 +36,8 @@ const AdminDashboard = () => {
     { id: 5, title: 'Results', icon: <Award size={24} />, color: '#E91E63' },
     { id: 6, title: 'Candidates', icon: <Users size={24} />, color: '#00BCD4' },
     { id: 7, title: 'Queries', icon: <HelpCircle size={24} />, color: '#F44336' },
-    { id: 8, title: 'Upload Key-Answers', icon: <BookOpen size={24}/>, color: '#795548' }
+    { id: 8, title: 'Upload Key-Answers', icon: <BookOpen size={24}/>, color: '#795548' },
+    { id: 9, title: 'Winner Details', icon: <Trophy size={24}/>, color: '#607D8B' } // Added new button
   ];
 
   const handleButtonClick = (id, title) => {
@@ -66,6 +67,9 @@ const AdminDashboard = () => {
         break;
       case 8:
         navigate("/uploadqa");
+        break;
+      case 9:
+        navigate("/winnerdetails"); // Added new route
         break;
       default:
         break;
