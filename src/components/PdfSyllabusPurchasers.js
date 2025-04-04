@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import API_BASE_URL from './configApi';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import API_BASE_URL from "./configApi"
 
 export default function PdfSyllabusPurchasers() {
   const [purchasers, setPurchasers] = useState([]);
@@ -16,12 +15,23 @@ export default function PdfSyllabusPurchasers() {
     const fetchPurchasers = async () => {
       try {
         setLoading(true);
-        const response = await axios.get(`${API_BASE_URL}api/get-pdf-syllabus-purchasers`);
+        // Use the API endpoint you provided
+        const response = await fetch(`${API_BASE_URL}/api/pdfsyllabuspurchasers`);
         
+        if (!response.ok) {
+          throw new Error(`Error: ${response.status}`);
+        }
+        
+        const result = await response.json();
+        
+        if (!result.success) {
+          throw new Error(result.message || 'Failed to fetch data');
+        }
+
         // Process the data into a more usable format
         const purchasersArray = [];
         
-        for (const [id, purchaserData] of Object.entries(response.data)) {
+        for (const [id, purchaserData] of Object.entries(result.data)) {
           // Calculate total PDFs purchased by student
           const totalPurchases = purchaserData.purchases ? Object.keys(purchaserData.purchases).length : 0;
           
@@ -41,11 +51,14 @@ export default function PdfSyllabusPurchasers() {
           purchasersArray.push({
             id,
             name: purchaserData.name || 'N/A',
+            email: purchaserData.email || 'N/A',
             age: purchaserData.age || 'N/A',
             gender: purchaserData.gender || 'N/A',
             phoneNo: purchaserData.phoneNo || 'N/A',
             district: purchaserData.district || 'N/A',
+            state: purchaserData.state || 'N/A',
             createdAt: purchaserData.createdAt,
+            updatedAt: purchaserData.updatedAt,
             totalPurchases,
             totalPaid,
             purchases: purchasesArray
@@ -110,6 +123,7 @@ export default function PdfSyllabusPurchasers() {
     return (
       purchaser.name.toLowerCase().includes(searchString) ||
       purchaser.phoneNo.toLowerCase().includes(searchString) ||
+      (purchaser.email && purchaser.email.toLowerCase().includes(searchString)) ||
       purchaser.district.toLowerCase().includes(searchString)
     );
   });
@@ -253,7 +267,7 @@ export default function PdfSyllabusPurchasers() {
                 <div className="position-relative">
                   <input
                     type="text"
-                    placeholder="Search by name, phone or district..."
+                    placeholder="Search by name, email, phone or district..."
                     className="form-control form-control-lg ps-5"
                     style={{borderRadius: '50px', boxShadow: '0 2px 4px rgba(0,0,0,0.05)'}}
                     value={searchTerm}
@@ -279,9 +293,11 @@ export default function PdfSyllabusPurchasers() {
                     S.No
                   </th>
                   {renderTableHeader('Name', 'name')}
+                  {renderTableHeader('Email', 'email')}
                   {renderTableHeader('Phone', 'phoneNo')}
                   {renderTableHeader('Gender', 'gender')}
                   {renderTableHeader('District', 'district')}
+                  {renderTableHeader('State', 'state')}
                   {renderTableHeader('Total PDFs', 'totalPurchases')}
                   {renderTableHeader('Total Paid', 'totalPaid')}
                   {renderTableHeader('Registration Date', 'createdAt')}
@@ -301,9 +317,11 @@ export default function PdfSyllabusPurchasers() {
                       >
                         <td className="px-4 py-3 fw-medium text-center" style={tableStyles.cellStyle}>{index + 1}</td>
                         <td className="px-4 py-3 fw-medium" style={tableStyles.cellStyle}>{purchaser.name}</td>
+                        <td className="px-4 py-3" style={tableStyles.cellStyle}>{purchaser.email}</td>
                         <td className="px-4 py-3" style={tableStyles.cellStyle}>{purchaser.phoneNo}</td>
                         <td className="px-4 py-3" style={tableStyles.cellStyle}>{purchaser.gender}</td>
                         <td className="px-4 py-3" style={tableStyles.cellStyle}>{purchaser.district}</td>
+                        <td className="px-4 py-3" style={tableStyles.cellStyle}>{purchaser.state}</td>
                         <td className="px-4 py-3 fw-medium text-center" style={tableStyles.cellStyle}>{purchaser.totalPurchases}</td>
                         <td className="px-4 py-3 fw-medium" style={tableStyles.cellStyle}>₹{purchaser.totalPaid.toFixed(2)}</td>
                         <td className="px-4 py-3" style={tableStyles.cellStyle}>{formatDate(purchaser.createdAt)}</td>
@@ -326,7 +344,7 @@ export default function PdfSyllabusPurchasers() {
                   })
                 ) : (
                   <tr>
-                    <td colSpan="9" className="text-center py-5 text-muted" style={{borderBottom: '1px solid #dee2e6'}}>
+                    <td colSpan="11" className="text-center py-5 text-muted" style={{borderBottom: '1px solid #dee2e6'}}>
                       No purchasers found matching your search criteria
                     </td>
                   </tr>
@@ -373,6 +391,12 @@ export default function PdfSyllabusPurchasers() {
                     </div>
                     <div className="col-md-4">
                       <div className="p-3 rounded" style={{backgroundColor: '#f0f7ff', border: '1px solid #d0e2ff'}}>
+                        <p className="small text-muted mb-1">Email</p>
+                        <p className="fw-medium mb-0">{selectedPurchaser.email}</p>
+                      </div>
+                    </div>
+                    <div className="col-md-4">
+                      <div className="p-3 rounded" style={{backgroundColor: '#f0f7ff', border: '1px solid #d0e2ff'}}>
                         <p className="small text-muted mb-1">Age</p>
                         <p className="fw-medium mb-0">{selectedPurchaser.age}</p>
                       </div>
@@ -391,8 +415,20 @@ export default function PdfSyllabusPurchasers() {
                     </div>
                     <div className="col-md-4">
                       <div className="p-3 rounded" style={{backgroundColor: '#f0f7ff', border: '1px solid #d0e2ff'}}>
+                        <p className="small text-muted mb-1">State</p>
+                        <p className="fw-medium mb-0">{selectedPurchaser.state}</p>
+                      </div>
+                    </div>
+                    <div className="col-md-4">
+                      <div className="p-3 rounded" style={{backgroundColor: '#f0f7ff', border: '1px solid #d0e2ff'}}>
                         <p className="small text-muted mb-1">Registration Date</p>
                         <p className="fw-medium mb-0">{formatDate(selectedPurchaser.createdAt)}</p>
+                      </div>
+                    </div>
+                    <div className="col-md-4">
+                      <div className="p-3 rounded" style={{backgroundColor: '#f0f7ff', border: '1px solid #d0e2ff'}}>
+                        <p className="small text-muted mb-1">Last Updated</p>
+                        <p className="fw-medium mb-0">{formatDate(selectedPurchaser.updatedAt)}</p>
                       </div>
                     </div>
                   </div>
