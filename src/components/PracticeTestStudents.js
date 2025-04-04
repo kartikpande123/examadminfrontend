@@ -1,74 +1,69 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import API_BASE_URL from './configApi';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import API_BASE_URL from './configApi';
+import { Aperture } from 'lucide-react';
 
-export default function PdfSyllabusPurchasers() {
-  const [purchasers, setPurchasers] = useState([]);
+export default function PracticeTestStudents() {
+  const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [selectedPurchaser, setSelectedPurchaser] = useState(null);
+  const [selectedStudent, setSelectedStudent] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const [sortConfig, setSortConfig] = useState({ key: 'createdAt', direction: 'descending' }); // Default sort by newest registration
+  const [sortConfig, setSortConfig] = useState({ key: 'registrationDate', direction: 'descending' }); // Default sort by newest registration
 
-  // Fetch purchasers data from API
+  // Fetch students data from API
   useEffect(() => {
-    const fetchPurchasers = async () => {
+    const fetchStudents = async () => {
+      setLoading(true);
+      setError(null);
+  
       try {
-        setLoading(true);
-        const response = await axios.get(`${API_BASE_URL}/api/pdfsyllabuspurchasers`);
-        
-        // Check if API returned success and data
-        if (!response.data.success) {
-          throw new Error(response.data.message || 'Failed to fetch data');
+        const response = await axios.get(`${API_BASE_URL}/api/practicetestpurchasedstudents`, {
+          timeout: 10000,
+        });
+  
+        console.log("Raw API Response:", response); // Debugging
+  
+        if (!response.data || !response.data.success || !response.data.data) {
+          throw new Error("Invalid data format received");
         }
-        
-        // Process the data into a more usable format
-        const purchasersArray = [];
-        
-        for (const [id, purchaserData] of Object.entries(response.data.data)) {
-          // Calculate total PDFs purchased by student
-          const totalPurchases = purchaserData.purchases ? Object.keys(purchaserData.purchases).length : 0;
-          
-          // Get total amount paid
-          const totalPaid = purchaserData.purchases ? Object.values(purchaserData.purchases).reduce((sum, purchase) => {
-            return sum + (purchase.paymentAmount || 0);
-          }, 0) : 0;
-          
-          // Format all purchases into array
-          const purchasesArray = purchaserData.purchases ? 
-            Object.entries(purchaserData.purchases).map(([purchaseId, purchaseData]) => ({
-              purchaseId,
-              ...purchaseData
-            })) : [];
-          
-          // Format purchaser data for our component
-          purchasersArray.push({
-            id,
-            name: purchaserData.name || 'N/A',
-            age: purchaserData.age || 'N/A',
-            gender: purchaserData.gender || 'N/A',
-            phoneNo: purchaserData.phoneNo || 'N/A',
-            district: purchaserData.district || 'N/A',
-            createdAt: purchaserData.createdAt,
-            totalPurchases,
-            totalPaid,
-            purchases: purchasesArray
-          });
-        }
-        
-        setPurchasers(purchasersArray);
+  
+        const studentsData = response.data.data;
+        console.log("Processed Data:", studentsData); // Debugging
+  
+        const studentsArray = Object.entries(studentsData).map(([id, studentData]) => ({
+          id,
+          name: studentData.name || "N/A",
+          email: studentData.email || "N/A",
+          phone: studentData.phoneNo || "N/A",
+          gender: studentData.gender || "N/A",
+          age: studentData.age || "N/A",
+          state: studentData.state || "N/A",
+          district: studentData.district || "N/A",
+          totalPaid: (studentData.purchases || []).reduce(
+            (sum, purchase) => sum + (purchase.paymentDetails?.amount || 0),
+            0
+          ),
+          registrationDate: studentData.registrationDate || "N/A",
+          lastUpdated: studentData.lastUpdated || "N/A",
+          studentId: studentData.studentId || "N/A",
+          purchases: studentData.purchases || [],
+          examAnalytics: studentData.ExamAnalytics || {},
+        }));
+  
+        setStudents(studentsArray);
+      } catch (error) {
+        console.error("Error fetching students:", error);
+        setError(error.message || "Failed to fetch students data");
+      } finally {
         setLoading(false);
-      } catch (err) {
-        setError('Failed to fetch purchasers data');
-        setLoading(false);
-        console.error('Error fetching purchasers:', err);
       }
     };
-
-    fetchPurchasers();
+  
+    fetchStudents();
   }, []);
-
+  
   // Handle sorting
   const requestSort = (key) => {
     let direction = 'ascending';
@@ -78,16 +73,16 @@ export default function PdfSyllabusPurchasers() {
     setSortConfig({ key, direction });
   };
 
-  // Sort purchasers based on current sort configuration
-  const sortedPurchasers = [...purchasers].sort((a, b) => {
+  // Sort students based on current sort configuration
+  const sortedStudents = [...students].sort((a, b) => {
     if (a[sortConfig.key] === undefined || b[sortConfig.key] === undefined) return 0;
     
-    if (sortConfig.key === 'totalPaid' || sortConfig.key === 'totalPurchases') {
-      // Numeric sort for financial data and counts
+    if (sortConfig.key === 'totalPaid') {
+      // Numeric sort for financial data
       return sortConfig.direction === 'ascending' 
         ? a[sortConfig.key] - b[sortConfig.key]
         : b[sortConfig.key] - a[sortConfig.key];
-    } else if (sortConfig.key === 'createdAt') {
+    } else if (sortConfig.key === 'registrationDate') {
       // Date sort for registration date
       const dateA = new Date(a[sortConfig.key] || 0);
       const dateB = new Date(b[sortConfig.key] || 0);
@@ -109,19 +104,20 @@ export default function PdfSyllabusPurchasers() {
     }
   });
 
-  // Filter purchasers based on search term
-  const filteredPurchasers = sortedPurchasers.filter(purchaser => {
+  // Filter students based on search term
+  const filteredStudents = sortedStudents.filter(student => {
     const searchString = searchTerm.toLowerCase();
     return (
-      purchaser.name.toLowerCase().includes(searchString) ||
-      purchaser.phoneNo.toLowerCase().includes(searchString) ||
-      purchaser.district.toLowerCase().includes(searchString)
+      student.name.toLowerCase().includes(searchString) ||
+      student.email.toLowerCase().includes(searchString) ||
+      student.phone.toLowerCase().includes(searchString) ||
+      (student.studentId && student.studentId.toLowerCase().includes(searchString))
     );
   });
 
-  // View purchaser details and scroll to top of modal
-  const viewPurchaserDetails = (purchaser) => {
-    setSelectedPurchaser(purchaser);
+  // View student details and scroll to top of modal
+  const viewStudentDetails = (student) => {
+    setSelectedStudent(student);
     // Set timeout to ensure modal is rendered before scrolling
     setTimeout(() => {
       const modalContent = document.querySelector('.modal-content');
@@ -131,19 +127,19 @@ export default function PdfSyllabusPurchasers() {
     }, 100);
   };
 
-  // Close purchaser details modal
+  // Close student details modal
   const closeDetails = () => {
-    setSelectedPurchaser(null);
+    setSelectedStudent(null);
   };
 
   // Format date
-  const formatDate = (timestamp) => {
-    if (!timestamp) return 'N/A';
+  const formatDate = (dateString) => {
+    if (!dateString) return 'N/A';
     try {
-      const date = new Date(timestamp);
+      const date = new Date(dateString);
       return date.toLocaleString();
     } catch (e) {
-      return 'Invalid Date';
+      return dateString;
     }
   };
 
@@ -173,10 +169,10 @@ export default function PdfSyllabusPurchasers() {
     );
   };
 
-  // Check if a purchaser is new (registered within last 7 days)
-  const isNewPurchaser = (createdAt) => {
-    if (!createdAt) return false;
-    const registrationTime = new Date(createdAt).getTime();
+  // Check if a student is new (registered within last 7 days)
+  const isNewStudent = (registrationDate) => {
+    if (!registrationDate) return false;
+    const registrationTime = new Date(registrationDate).getTime();
     const sevenDaysAgo = new Date();
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
     return registrationTime >= sevenDaysAgo.getTime();
@@ -235,8 +231,8 @@ export default function PdfSyllabusPurchasers() {
         {/* Header */}
         <div className="card mb-4 border-0 shadow-sm">
           <div style={headerStyle}>
-            <h1 className="display-6 fw-bold mb-0">PDF Syllabus Purchasers</h1>
-            <p className="mt-2 text-white-50">Admin Dashboard for PDF Syllabus Sales</p>
+            <h1 className="display-6 fw-bold mb-0">Practice Student Purchase</h1>
+            <p className="mt-2 text-white-50">Admin Dashboard for Student Practice Tests</p>
           </div>
         </div>
         
@@ -246,11 +242,11 @@ export default function PdfSyllabusPurchasers() {
           <div className="card-header bg-white border-bottom border-light p-4">
             <div className="row align-items-center">
               <div className="col-md-6 mb-3 mb-md-0">
-                <h2 className="h4 fw-bold text-primary mb-0">Purchaser Records</h2>
+                <h2 className="h4 fw-bold text-primary mb-0">Student Records</h2>
                 <p className="text-muted small mt-1 mb-0">
-                  Displaying {filteredPurchasers.length} purchasers 
+                  Displaying {filteredStudents.length} students 
                   {searchTerm ? ` matching "${searchTerm}"` : ''}
-                  {sortConfig.key === 'createdAt' && sortConfig.direction === 'descending' ? 
+                  {sortConfig.key === 'registrationDate' && sortConfig.direction === 'descending' ? 
                     ' (newest first)' : ''}
                 </p>
               </div>
@@ -258,7 +254,7 @@ export default function PdfSyllabusPurchasers() {
                 <div className="position-relative">
                   <input
                     type="text"
-                    placeholder="Search by name, phone or district..."
+                    placeholder="Search by name, email, phone or ID..."
                     className="form-control form-control-lg ps-5"
                     style={{borderRadius: '50px', boxShadow: '0 2px 4px rgba(0,0,0,0.05)'}}
                     value={searchTerm}
@@ -272,7 +268,7 @@ export default function PdfSyllabusPurchasers() {
             </div>
           </div>
           
-          {/* Purchasers Table */}
+          {/* Students Table */}
           <div className="table-responsive p-0">
             <table className="table table-hover mb-0" style={tableStyles.tableStyle}>
               <thead>
@@ -283,38 +279,38 @@ export default function PdfSyllabusPurchasers() {
                   >
                     S.No
                   </th>
+                  {renderTableHeader('Student ID', 'studentId')}
                   {renderTableHeader('Name', 'name')}
-                  {renderTableHeader('Phone', 'phoneNo')}
-                  {renderTableHeader('Gender', 'gender')}
-                  {renderTableHeader('District', 'district')}
-                  {renderTableHeader('Total PDFs', 'totalPurchases')}
+                  {renderTableHeader('Email', 'email')}
+                  {renderTableHeader('Phone', 'phone')}
                   {renderTableHeader('Total Paid', 'totalPaid')}
-                  {renderTableHeader('Registration Date', 'createdAt')}
+                  {renderTableHeader('Registration Date', 'registrationDate')}
                   <th className="px-4 py-3 text-primary" style={tableStyles.headerCellStyle}>Actions</th>
                 </tr>
               </thead>
               <tbody>
-                {filteredPurchasers.length > 0 ? (
-                  filteredPurchasers.map((purchaser, index) => {
-                    const isNew = isNewPurchaser(purchaser.createdAt);
+                {filteredStudents.length > 0 ? (
+                  filteredStudents.map((student, index) => {
+                    const isNew = isNewStudent(student.registrationDate);
                     return (
-                      <tr key={purchaser.id} 
+                      <tr key={student.id} 
                         style={{
                           transition: 'background-color 0.2s ease',
                           backgroundColor: isNew ? 'rgba(25, 135, 84, 0.1)' : ''
                         }}
                       >
                         <td className="px-4 py-3 fw-medium text-center" style={tableStyles.cellStyle}>{index + 1}</td>
-                        <td className="px-4 py-3 fw-medium" style={tableStyles.cellStyle}>{purchaser.name}</td>
-                        <td className="px-4 py-3" style={tableStyles.cellStyle}>{purchaser.phoneNo}</td>
-                        <td className="px-4 py-3" style={tableStyles.cellStyle}>{purchaser.gender}</td>
-                        <td className="px-4 py-3" style={tableStyles.cellStyle}>{purchaser.district}</td>
-                        <td className="px-4 py-3 fw-medium text-center" style={tableStyles.cellStyle}>{purchaser.totalPurchases}</td>
-                        <td className="px-4 py-3 fw-medium" style={tableStyles.cellStyle}>₹{purchaser.totalPaid.toFixed(2)}</td>
-                        <td className="px-4 py-3" style={tableStyles.cellStyle}>{formatDate(purchaser.createdAt)}</td>
+                        <td className="px-4 py-3" style={tableStyles.cellStyle}>{student.studentId || 'N/A'}</td>
+                        <td className="px-4 py-3 fw-medium" style={tableStyles.cellStyle}>
+                          {student.name}
+                        </td>
+                        <td className="px-4 py-3" style={tableStyles.cellStyle}>{student.email}</td>
+                        <td className="px-4 py-3" style={tableStyles.cellStyle}>{student.phone}</td>
+                        <td className="px-4 py-3 fw-medium" style={tableStyles.cellStyle}>₹{student.totalPaid.toFixed(2)}</td>
+                        <td className="px-4 py-3" style={tableStyles.cellStyle}>{formatDate(student.registrationDate)}</td>
                         <td className="px-4 py-3" style={{...tableStyles.cellStyle, borderRight: 'none'}}>
                           <button
-                            onClick={() => viewPurchaserDetails(purchaser)}
+                            onClick={() => viewStudentDetails(student)}
                             className="btn btn-primary btn-sm px-3 py-2"
                             style={{
                               backgroundColor: '#1e5bb0', 
@@ -331,8 +327,8 @@ export default function PdfSyllabusPurchasers() {
                   })
                 ) : (
                   <tr>
-                    <td colSpan="9" className="text-center py-5 text-muted" style={{borderBottom: '1px solid #dee2e6'}}>
-                      No purchasers found matching your search criteria
+                    <td colSpan="8" className="text-center py-5 text-muted" style={{borderBottom: '1px solid #dee2e6'}}>
+                      No students found matching your search criteria
                     </td>
                   </tr>
                 )}
@@ -342,13 +338,13 @@ export default function PdfSyllabusPurchasers() {
         </div>
       </div>
       
-      {/* Purchaser Details Modal */}
-      {selectedPurchaser && (
+      {/* Student Details Modal */}
+      {selectedStudent && (
         <div className="modal show d-block" style={{backgroundColor: 'rgba(0,0,0,0.5)'}} tabIndex="-1">
           <div className="modal-dialog modal-lg modal-dialog-scrollable">
             <div className="modal-content" style={{maxHeight: '90vh', overflowY: 'auto', borderRadius: '8px'}}>
               <div className="modal-header sticky-top" style={{backgroundImage: 'linear-gradient(to right, #1a4b8c, #2d7dd2)', color: 'white'}}>
-                <h5 className="modal-title fw-bold">Purchaser Details</h5>
+                <h5 className="modal-title fw-bold">Student Details</h5>
                 <button 
                   type="button" 
                   className="btn-close btn-close-white" 
@@ -366,38 +362,56 @@ export default function PdfSyllabusPurchasers() {
                   <div className="row g-3">
                     <div className="col-md-4">
                       <div className="p-3 rounded" style={{backgroundColor: '#f0f7ff', border: '1px solid #d0e2ff'}}>
+                        <p className="small text-muted mb-1">Student ID</p>
+                        <p className="fw-medium mb-0">{selectedStudent.studentId || 'N/A'}</p>
+                      </div>
+                    </div>
+                    <div className="col-md-4">
+                      <div className="p-3 rounded" style={{backgroundColor: '#f0f7ff', border: '1px solid #d0e2ff'}}>
                         <p className="small text-muted mb-1">Name</p>
-                        <p className="fw-medium mb-0">{selectedPurchaser.name}</p>
+                        <p className="fw-medium mb-0">{selectedStudent.name}</p>
+                      </div>
+                    </div>
+                    <div className="col-md-4">
+                      <div className="p-3 rounded" style={{backgroundColor: '#f0f7ff', border: '1px solid #d0e2ff'}}>
+                        <p className="small text-muted mb-1">Email</p>
+                        <p className="fw-medium mb-0">{selectedStudent.email}</p>
                       </div>
                     </div>
                     <div className="col-md-4">
                       <div className="p-3 rounded" style={{backgroundColor: '#f0f7ff', border: '1px solid #d0e2ff'}}>
                         <p className="small text-muted mb-1">Phone</p>
-                        <p className="fw-medium mb-0">{selectedPurchaser.phoneNo}</p>
-                      </div>
-                    </div>
-                    <div className="col-md-4">
-                      <div className="p-3 rounded" style={{backgroundColor: '#f0f7ff', border: '1px solid #d0e2ff'}}>
-                        <p className="small text-muted mb-1">Age</p>
-                        <p className="fw-medium mb-0">{selectedPurchaser.age}</p>
+                        <p className="fw-medium mb-0">{selectedStudent.phone}</p>
                       </div>
                     </div>
                     <div className="col-md-4">
                       <div className="p-3 rounded" style={{backgroundColor: '#f0f7ff', border: '1px solid #d0e2ff'}}>
                         <p className="small text-muted mb-1">Gender</p>
-                        <p className="fw-medium mb-0">{selectedPurchaser.gender}</p>
+                        <p className="fw-medium mb-0">{selectedStudent.gender}</p>
+                      </div>
+                    </div>
+                    <div className="col-md-4">
+                      <div className="p-3 rounded" style={{backgroundColor: '#f0f7ff', border: '1px solid #d0e2ff'}}>
+                        <p className="small text-muted mb-1">Age</p>
+                        <p className="fw-medium mb-0">{selectedStudent.age}</p>
+                      </div>
+                    </div>
+                    <div className="col-md-4">
+                      <div className="p-3 rounded" style={{backgroundColor: '#f0f7ff', border: '1px solid #d0e2ff'}}>
+                        <p className="small text-muted mb-1">State</p>
+                        <p className="fw-medium mb-0">{selectedStudent.state}</p>
                       </div>
                     </div>
                     <div className="col-md-4">
                       <div className="p-3 rounded" style={{backgroundColor: '#f0f7ff', border: '1px solid #d0e2ff'}}>
                         <p className="small text-muted mb-1">District</p>
-                        <p className="fw-medium mb-0">{selectedPurchaser.district}</p>
+                        <p className="fw-medium mb-0">{selectedStudent.district}</p>
                       </div>
                     </div>
                     <div className="col-md-4">
                       <div className="p-3 rounded" style={{backgroundColor: '#f0f7ff', border: '1px solid #d0e2ff'}}>
                         <p className="small text-muted mb-1">Registration Date</p>
-                        <p className="fw-medium mb-0">{formatDate(selectedPurchaser.createdAt)}</p>
+                        <p className="fw-medium mb-0">{formatDate(selectedStudent.registrationDate)}</p>
                       </div>
                     </div>
                   </div>
@@ -405,8 +419,8 @@ export default function PdfSyllabusPurchasers() {
                 
                 {/* Purchase Information */}
                 <div className="mb-4">
-                  <h3 className="h5 fw-bold text-primary border-bottom pb-2 mb-3">PDF Syllabus Purchases</h3>
-                  {selectedPurchaser.purchases && selectedPurchaser.purchases.length > 0 ? (
+                  <h3 className="h5 fw-bold text-primary border-bottom pb-2 mb-3">Purchase Information</h3>
+                  {selectedStudent.purchases && selectedStudent.purchases.length > 0 ? (
                     <div className="table-responsive rounded shadow-sm">
                       <table className="table table-hover mb-0" style={tableStyles.tableStyle}>
                         <thead>
@@ -415,28 +429,30 @@ export default function PdfSyllabusPurchasers() {
                             <th className="px-3 py-2 text-primary small" style={tableStyles.headerCellStyle}>Title</th>
                             <th className="px-3 py-2 text-primary small" style={tableStyles.headerCellStyle}>Category</th>
                             <th className="px-3 py-2 text-primary small" style={tableStyles.headerCellStyle}>Duration</th>
-                            <th className="px-3 py-2 text-primary small" style={tableStyles.headerCellStyle}>Price</th>
+                            <th className="px-3 py-2 text-primary small" style={tableStyles.headerCellStyle}>Time Limit</th>
+                            <th className="px-3 py-2 text-primary small" style={tableStyles.headerCellStyle}>Amount</th>
                             <th className="px-3 py-2 text-primary small" style={tableStyles.headerCellStyle}>Payment Status</th>
-                            <th className="px-3 py-2 text-primary small" style={tableStyles.headerCellStyle}>Order ID</th>
                             <th className="px-3 py-2 text-primary small" style={{...tableStyles.headerCellStyle, borderRight: 'none'}}>Purchase Date</th>
                           </tr>
                         </thead>
                         <tbody>
-                          {selectedPurchaser.purchases.map((purchase, index) => (
+                          {selectedStudent.purchases.map((purchase, index) => (
                             <tr key={index}>
                               <td className="px-3 py-2 text-center" style={tableStyles.cellStyle}>{index + 1}</td>
-                              <td className="px-3 py-2" style={tableStyles.cellStyle}>{purchase.syllabusTitle || 'N/A'}</td>
-                              <td className="px-3 py-2" style={tableStyles.cellStyle}>{purchase.syllabusCategory || 'N/A'}</td>
-                              <td className="px-3 py-2" style={tableStyles.cellStyle}>{purchase.syllabusDuration || 'N/A'}</td>
-                              <td className="px-3 py-2 fw-medium" style={tableStyles.cellStyle}>₹{(purchase.paymentAmount || 0).toFixed(2)}</td>
+                              <td className="px-3 py-2" style={tableStyles.cellStyle}>{purchase.examDetails?.title || 'N/A'}</td>
+                              <td className="px-3 py-2" style={tableStyles.cellStyle}>{purchase.examDetails?.category || 'N/A'}</td>
+                              <td className="px-3 py-2" style={tableStyles.cellStyle}>{purchase.examDetails?.duration || 'N/A'}</td>
+                              <td className="px-3 py-2" style={tableStyles.cellStyle}>{purchase.examDetails?.timeLimit || 'N/A'}</td>
+                              <td className="px-3 py-2 fw-medium" style={tableStyles.cellStyle}>₹{(purchase.paymentDetails?.amount || 0).toFixed(2)}</td>
                               <td className="px-3 py-2" style={tableStyles.cellStyle}>
                                 <span className={`badge rounded-pill px-3 py-2 ${
-                                  purchase.paymentStatus === 'completed' ? 'bg-success' : 'bg-warning'
+                                  purchase.paymentDetails?.status === 'captured' || purchase.paymentDetails?.status === 'free' 
+                                    ? 'bg-success' 
+                                    : 'bg-warning'
                                 }`} style={{fontSize: '0.75rem'}}>
-                                  {purchase.paymentStatus || 'N/A'}
+                                  {purchase.paymentDetails?.status || 'N/A'}
                                 </span>
                               </td>
-                              <td className="px-3 py-2 small" style={tableStyles.cellStyle}>{purchase.orderId || 'N/A'}</td>
                               <td className="px-3 py-2" style={{...tableStyles.cellStyle, borderRight: 'none'}}>{formatDate(purchase.purchaseDate)}</td>
                             </tr>
                           ))}
