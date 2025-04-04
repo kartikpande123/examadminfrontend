@@ -473,7 +473,7 @@ const PdfSyllabusDetails = () => {
             ) : (
               Object.entries(pdfSyllabi).map(([category, syllabi]) => (
                 <div key={category} className="mb-4">
-                  <h4 className="bg-light p-2 rounded">{category}</h4>
+                  <h4 className="p-2 rounded" style={{backgroundColor:"#46a3ff"}}>{category}</h4>
                   <ul className="list-group">
                     {Object.entries(syllabi).map(([title, details]) => (
                       <li key={title} className="list-group-item">
