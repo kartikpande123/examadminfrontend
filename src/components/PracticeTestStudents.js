@@ -11,7 +11,7 @@ const PracticeTestStudents = () => {
     const fetchStudentData = async () => {
       try {
         setLoading(true);
-        const response = await axios.get(`${API_BASE_URL}/api/practice-test-students`);
+        const response = await axios.get(`${API_BASE_URL}/practice-test-students`);
         setStudents(response.data);
         setLoading(false);
       } catch (err) {
