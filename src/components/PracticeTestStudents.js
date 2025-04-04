@@ -15,19 +15,22 @@ export default function PracticeTestStudents() {
   useEffect(() => {
     const fetchStudents = async () => {
       setLoading(true);
-      setError(null); // Reset error before fetching
+      setError(null);
   
       try {
-        const { data } = await axios.get(`${API_BASE_URL}/get-all-students`, {
-          timeout: 10000, // Add timeout to prevent indefinite waiting
+        const response = await axios.get(`${API_BASE_URL}/get-all-students`, {
+          timeout: 10000,
         });
   
-        if (!data || typeof data !== "object") {
+        console.log("Raw API Response:", response); // Debugging
+  
+        if (!response.data || typeof response.data !== "object") {
           throw new Error("Invalid data format received");
         }
   
-        // Convert response object into array format
-        const studentsArray = Object.entries(data).map(([id, studentData]) => ({
+        console.log("Processed Data:", response.data); // Debugging
+  
+        const studentsArray = Object.entries(response.data).map(([id, studentData]) => ({
           id,
           name: studentData.name || "N/A",
           email: studentData.email || "N/A",
@@ -58,6 +61,7 @@ export default function PracticeTestStudents() {
   
     fetchStudents();
   }, []);
+  
   
 
   // Handle sorting
