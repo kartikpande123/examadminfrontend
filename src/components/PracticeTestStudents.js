@@ -14,49 +14,51 @@ export default function PracticeTestStudents() {
   // Fetch students data from API
   useEffect(() => {
     const fetchStudents = async () => {
+      setLoading(true);
+      setError(null); // Reset error before fetching
+  
       try {
-        setLoading(true);
-        const response = await axios.get(`${API_BASE_URL}/get-all-students`);
-        
-        // Process the data into a more usable format
-        const studentsArray = [];
-        
-        for (const [id, studentData] of Object.entries(response.data)) {
-          // Calculate total amount paid by student
-          const totalPaid = studentData.purchases?.reduce((sum, purchase) => {
-            return sum + (purchase.paymentDetails?.amount || 0);
-          }, 0) || 0;
-          
-          // Format student data for our component
-          studentsArray.push({
-            id,
-            name: studentData.name || 'N/A',
-            email: studentData.email || 'N/A',
-            phone: studentData.phoneNo || 'N/A',
-            gender: studentData.gender || 'N/A',
-            age: studentData.age || 'N/A',
-            state: studentData.state || 'N/A',
-            district: studentData.district || 'N/A',
-            totalPaid,
-            registrationDate: studentData.registrationDate,
-            lastUpdated: studentData.lastUpdated,
-            studentId: studentData.studentId,
-            purchases: studentData.purchases || [],
-            examAnalytics: studentData.ExamAnalytics || {}
-          });
+        const { data } = await axios.get(`${API_BASE_URL}/get-all-students`, {
+          timeout: 10000, // Add timeout to prevent indefinite waiting
+        });
+  
+        if (!data || typeof data !== "object") {
+          throw new Error("Invalid data format received");
         }
-        
+  
+        // Convert response object into array format
+        const studentsArray = Object.entries(data).map(([id, studentData]) => ({
+          id,
+          name: studentData.name || "N/A",
+          email: studentData.email || "N/A",
+          phone: studentData.phoneNo || "N/A",
+          gender: studentData.gender || "N/A",
+          age: studentData.age || "N/A",
+          state: studentData.state || "N/A",
+          district: studentData.district || "N/A",
+          totalPaid: (studentData.purchases || []).reduce(
+            (sum, purchase) => sum + (purchase.paymentDetails?.amount || 0),
+            0
+          ),
+          registrationDate: studentData.registrationDate || "N/A",
+          lastUpdated: studentData.lastUpdated || "N/A",
+          studentId: studentData.studentId || "N/A",
+          purchases: studentData.purchases || [],
+          examAnalytics: studentData.ExamAnalytics || {},
+        }));
+  
         setStudents(studentsArray);
+      } catch (error) {
+        console.error("Error fetching students:", error);
+        setError(error.message || "Failed to fetch students data");
+      } finally {
         setLoading(false);
-      } catch (err) {
-        setError('Failed to fetch students data');
-        setLoading(false);
-        console.error('Error fetching students:', err);
       }
     };
-
+  
     fetchStudents();
   }, []);
+  
 
   // Handle sorting
   const requestSort = (key) => {
