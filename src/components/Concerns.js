@@ -8,7 +8,7 @@ const Concerns = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [modalImage, setModalImage] = useState(null);
-
+  
   // Fetch concerns from the server
   useEffect(() => {
     const fetchConcerns = async () => {
@@ -17,14 +17,17 @@ const Concerns = () => {
         setConcerns(response.data.concerns);
         setLoading(false);
       } catch (err) {
-        setError("Failed to load concerns");
+        // Only set error if it's not an empty concerns issue
+        if (err.response && err.response.status !== 404) {
+          setError("Failed to load concerns");
+        }
         setLoading(false);
       }
     };
-
+    
     fetchConcerns();
   }, []);
-
+  
   // Handle deleting a concern
   const handleDelete = async (id) => {
     try {
@@ -35,55 +38,59 @@ const Concerns = () => {
       alert("Error deleting concern");
     }
   };
-
+  
   // Handle opening the image modal
   const openModal = (imageUrl) => {
     setModalImage(imageUrl);
   };
-
+  
   // Handle closing the image modal
   const closeModal = () => {
     setModalImage(null);
   };
-
+  
   if (loading) {
-    return <div>Loading...</div>;
+    return <div className="loading-indicator">Loading...</div>;
   }
-
+  
   if (error) {
-    return <div>{error}</div>;
+    return <div className="error-message">{error}</div>;
   }
-
+  
   return (
     <div className="notification-manager">
       <div className="section-heading">Concerns</div>
       <div className="notification-list">
-        {concerns.map((concern) => (
-          <div className="notification-item" key={concern.id}>
-            <div className="notification-details">
-              {concern.photoUrl && (
-                <img
-                  src={concern.photoUrl}
-                  alt="Concern"
-                  className="concern-image"
-                  onClick={() => openModal(concern.photoUrl)}
-                />
-              )}
-              <div className="notification-message">{concern.concernText}</div>
-              <div className="notification-datetime">{concern.createdAt}</div>
+        {concerns.length > 0 ? (
+          concerns.map((concern) => (
+            <div className="notification-item" key={concern.id}>
+              <div className="notification-details">
+                {concern.photoUrl && (
+                  <img
+                    src={concern.photoUrl}
+                    alt="Concern"
+                    className="concern-image"
+                    onClick={() => openModal(concern.photoUrl)}
+                  />
+                )}
+                <div className="notification-message">{concern.concernText}</div>
+                <div className="notification-datetime">{concern.createdAt}</div>
+              </div>
+              <div className="notification-actions">
+                <button
+                  className="delete-button"
+                  onClick={() => handleDelete(concern.id)}
+                >
+                  Delete
+                </button>
+              </div>
             </div>
-            <div className="notification-actions">
-              <button
-                className="delete-button"
-                onClick={() => handleDelete(concern.id)}
-              >
-                Delete
-              </button>
-            </div>
-          </div>
-        ))}
+          ))
+        ) : (
+          <div className="no-concerns-message">No concerns to display</div>
+        )}
       </div>
-
+      
       {/* Image Modal */}
       {modalImage && (
         <div className="image-modal" onClick={closeModal}>

@@ -12,6 +12,16 @@ import UploadExamQA from "./components/UploadQa";
 import ExamResults from "./components/Results";
 import Protected from "./components/Protected";
 import WinnerDetails from "./components/WinnerDetails"
+import PracticeDashboard from "./components/PracticeDashboard";
+import CategoryManager from "./components/PracticeCategory";
+import PracticeTestDetails from "./components/PracticeTestDetails";
+import PracticeTestQuestionManager from "./components/PracticeQuestions";
+import CandidatesNoPhoto from "./components/CandidatsNoPhoto";
+import PracticeTestStudents from "./components/PracticeTestStudents";
+import PdfSyllabusDashboard from "./components/PdfSyllabusDashboard";
+import PdfSyllabusCategoryManager from "./components/PdfSyllabusCatrgory";
+import PdfSyllabusDetails from "./components/PdfSyllabusDetails";
+import PdfSyllabusPurchasers from "./components/PdfSyllabusPurchasers";
 
 function App() {
   return (
@@ -27,8 +37,18 @@ function App() {
           <Route path="/concirns" element={<Protected Component={Concerns} />} />
           <Route path="/uploadqa" element={<Protected Component={UploadExamQA} />} />
           <Route path="/candidates" element={<Protected Component={Candidates} />} />
+          <Route path="/candidatesnophoto" element={<Protected Component={CandidatesNoPhoto} />} />
           <Route path="/examresults" element={<Protected Component={ExamResults} />} />
           <Route path="/winnerdetails" element={<Protected Component={WinnerDetails} />} />
+          <Route path="/practiceDashboard" element={<Protected Component={PracticeDashboard} />} />
+          <Route path="/practicecategory" element={<Protected Component={CategoryManager} />} />
+          <Route path="/practicetestdetails" element={<Protected Component={PracticeTestDetails} />} />
+          <Route path="/practicetestquestions" element={<Protected Component={PracticeTestQuestionManager} />} />
+          <Route path="/practiceteststudents" element={<Protected Component={PracticeTestStudents} />} />
+          <Route path="/pdfsyllabusdashboard" element={<Protected Component={PdfSyllabusDashboard} />} />
+          <Route path="/pdfcategory" element={<Protected Component={PdfSyllabusCategoryManager} />} />
+          <Route path="/pdfdetails" element={<Protected Component={PdfSyllabusDetails} />} />
+          <Route path="/pdfpurchasers" element={<Protected Component={PdfSyllabusPurchasers} />} />
         </Routes>
       </div>
     </Router>
