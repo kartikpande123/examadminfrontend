@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import API_BASE_URL from './configApi';
 
-const PracticeTestStudents = () => {
+const PurchasedPracticeTestStudents = () => {
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -11,17 +11,21 @@ const PracticeTestStudents = () => {
     const fetchStudentData = async () => {
       try {
         setLoading(true);
-        // Use the /get-all-students endpoint as specified
-        const response = await axios.get(`${API_BASE_URL}/get-all-students`);
+        // Call the new API endpoint we created
+        const response = await axios.get(`${API_BASE_URL}/api/practicetestpurchasedstudents`);
         
-        // Convert object of objects to array of objects with keys
-        const studentsData = response.data;
-        const studentsArray = Object.keys(studentsData).map(key => ({
-          key,
-          ...studentsData[key]
-        }));
-        
-        setStudents(studentsArray);
+        if (response.data.success) {
+          // Convert object of objects to array of objects with keys
+          const studentsData = response.data.data;
+          const studentsArray = Object.keys(studentsData).map(key => ({
+            key,
+            ...studentsData[key]
+          }));
+          
+          setStudents(studentsArray);
+        } else {
+          setError('Failed to fetch student data');
+        }
         setLoading(false);
       } catch (err) {
         setError('Failed to fetch student data');
@@ -93,7 +97,7 @@ const PracticeTestStudents = () => {
 
   return (
     <div className="container mx-auto p-4">
-      <h2 className="text-2xl font-bold mb-6">Practice Test Students</h2>
+      <h2 className="text-2xl font-bold mb-6">Purchased Practice Test Students</h2>
       
       <div className="space-y-6">
         {students.map((student) => (
@@ -127,4 +131,4 @@ const PracticeTestStudents = () => {
   );
 };
 
-export default PracticeTestStudents;
+export default PurchasedPracticeTestStudents;
