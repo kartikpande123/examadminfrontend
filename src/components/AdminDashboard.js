@@ -11,7 +11,8 @@ import {
   HelpCircle,
   Trophy,
   ClockIcon,
-  BookAIcon
+  BookAIcon,
+  CreditCard
 } from 'lucide-react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './AdminDashboard.css'; // Keep the original CSS import
@@ -117,6 +118,7 @@ const AdminDashboard = () => {
     { id: 10, title: 'Winner Details', icon: <Trophy size={24}/>, color: '#607D8B' },
     { id: 11, title: 'Practice Test Details', icon: <ClockIcon size={24}/>, color: '#3949AB', special: true },
     { id: 12, title: 'PDF Syllabus Details', icon: <BookAIcon size={24}/>, color: '#3949AB', special: true },
+    { id: 13, title: 'GST Invoice Download', icon: <CreditCard size={24}/>, color: '#3949AB', special: true },
   ];
 
   const handleButtonClick = (id, title) => {
@@ -158,6 +160,9 @@ const AdminDashboard = () => {
         break;
       case 12:
         navigate("/pdfsyllabusdashboard");
+        break;
+      case 13:
+        navigate("/gstinvoice");
         break;
       default:
         break;

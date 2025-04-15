@@ -22,6 +22,7 @@ import PdfSyllabusDashboard from "./components/PdfSyllabusDashboard";
 import PdfSyllabusCategoryManager from "./components/PdfSyllabusCatrgory";
 import PdfSyllabusDetails from "./components/PdfSyllabusDetails";
 import PdfSyllabusPurchasers from "./components/PdfSyllabusPurchasers";
+import GstInvoice from "./components/GstInvoice";
 
 function App() {
   return (
@@ -49,6 +50,7 @@ function App() {
           <Route path="/pdfcategory" element={<Protected Component={PdfSyllabusCategoryManager} />} />
           <Route path="/pdfdetails" element={<Protected Component={PdfSyllabusDetails} />} />
           <Route path="/pdfpurchasers" element={<Protected Component={PdfSyllabusPurchasers} />} />
+          <Route path="/gstinvoice" element={<Protected Component={GstInvoice} />} />
         </Routes>
       </div>
     </Router>
