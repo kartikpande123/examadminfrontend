@@ -431,8 +431,12 @@ export default function GstInvoice() {
         price = purchaseData.paymentAmount;
       }
       
+      // Ensure price is a valid number
+      const priceValue = parseFloat(price) || 0;
+      
       // Calculate amount without GST (82% of total amount)
-      const priceWithoutGST = (parseFloat(price) * 0.82).toFixed(2);
+      const priceWithoutGST = (priceValue * 0.82).toFixed(2);
+      const priceWithGST = priceValue.toFixed(2); // Format the price with GST
       
       // Function to wrap text and return height needed
       const wrapText = (text, maxWidth) => {
@@ -483,7 +487,7 @@ export default function GstInvoice() {
       // Fill amount cells (centered vertically if the description wraps to multiple lines)
       const amountY = currentY + (contentRowHeight / 2) + 3;
       pdf.text(priceWithoutGST, tableStartX + colWidths[0] + colWidths[1]/2, amountY, { align: 'center' });
-      pdf.text(price, tableStartX + colWidths[0] + colWidths[1] + colWidths[2]/2, amountY, { align: 'center' });
+      pdf.text(priceWithGST, tableStartX + colWidths[0] + colWidths[1] + colWidths[2]/2, amountY, { align: 'center' });
       
       currentY += contentRowHeight;
       
@@ -521,7 +525,7 @@ export default function GstInvoice() {
       pdf.setTextColor(255, 255, 255);
       pdf.text('Total Amount:', tableStartX + colWidths[0] + 5, currentY + 10);
       pdf.setFontSize(12);
-      pdf.text(`INR ${price}`, tableStartX + tableWidth - 5, currentY + 10, { align: 'right' });
+      pdf.text(`INR ${priceWithGST}`, tableStartX + tableWidth - 5, currentY + 10, { align: 'right' });
       
       // Footer with top border
       pdf.setDrawColor(0, 0, 0);
