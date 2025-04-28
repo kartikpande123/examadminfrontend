@@ -124,7 +124,8 @@ export default function PdfSyllabusPurchasers() {
       purchaser.name.toLowerCase().includes(searchString) ||
       purchaser.phoneNo.toLowerCase().includes(searchString) ||
       (purchaser.email && purchaser.email.toLowerCase().includes(searchString)) ||
-      purchaser.district.toLowerCase().includes(searchString)
+      purchaser.district.toLowerCase().includes(searchString) ||
+      purchaser.id.toLowerCase().includes(searchString)
     );
   });
 
@@ -267,7 +268,7 @@ export default function PdfSyllabusPurchasers() {
                 <div className="position-relative">
                   <input
                     type="text"
-                    placeholder="Search by name, email, phone or district..."
+                    placeholder="Search by name, email, phone, district or student ID..."
                     className="form-control form-control-lg ps-5"
                     style={{borderRadius: '50px', boxShadow: '0 2px 4px rgba(0,0,0,0.05)'}}
                     value={searchTerm}
@@ -292,6 +293,7 @@ export default function PdfSyllabusPurchasers() {
                   >
                     S.No
                   </th>
+                  {renderTableHeader('Student ID', 'id')}
                   {renderTableHeader('Name', 'name')}
                   {renderTableHeader('Email', 'email')}
                   {renderTableHeader('Phone', 'phoneNo')}
@@ -316,6 +318,7 @@ export default function PdfSyllabusPurchasers() {
                         }}
                       >
                         <td className="px-4 py-3 fw-medium text-center" style={tableStyles.cellStyle}>{index + 1}</td>
+                        <td className="px-4 py-3 fw-medium small" style={tableStyles.cellStyle}>{purchaser.id}</td>
                         <td className="px-4 py-3 fw-medium" style={tableStyles.cellStyle}>{purchaser.name}</td>
                         <td className="px-4 py-3" style={tableStyles.cellStyle}>{purchaser.email}</td>
                         <td className="px-4 py-3" style={tableStyles.cellStyle}>{purchaser.phoneNo}</td>
@@ -344,7 +347,7 @@ export default function PdfSyllabusPurchasers() {
                   })
                 ) : (
                   <tr>
-                    <td colSpan="11" className="text-center py-5 text-muted" style={{borderBottom: '1px solid #dee2e6'}}>
+                    <td colSpan="12" className="text-center py-5 text-muted" style={{borderBottom: '1px solid #dee2e6'}}>
                       No purchasers found matching your search criteria
                     </td>
                   </tr>
@@ -377,6 +380,12 @@ export default function PdfSyllabusPurchasers() {
                     Personal Information
                   </h3>
                   <div className="row g-3">
+                    <div className="col-12">
+                      <div className="p-3 rounded" style={{backgroundColor: '#f8f9ff', border: '1px solid #dce1ff'}}>
+                        <p className="small text-muted mb-1">Student ID</p>
+                        <p className="fw-medium mb-0">{selectedPurchaser.id}</p>
+                      </div>
+                    </div>
                     <div className="col-md-4">
                       <div className="p-3 rounded" style={{backgroundColor: '#f0f7ff', border: '1px solid #d0e2ff'}}>
                         <p className="small text-muted mb-1">Name</p>
